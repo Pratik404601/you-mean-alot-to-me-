@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>will you?</title>
+<style>
+  :root {
+    --blush: #f7e4e4;
+    --rose: #e8a0a8;
+    --rose-deep: #c9697a;
+    --cream: #fdf6f1;
+    --ink: #4a3a3d;
+    --gold: #d8a657;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    height: 100%;
+    overflow: hidden;
+    background: linear-gradient(160deg, var(--cream) 0%, var(--blush) 55%, #f3d6da 100%);
+    font-family: 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
+    color: var(--ink);
+  }
+
+  .stage {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    text-align: center;
+  }
+
+  .hearts {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .heart {
+    position: absolute;
+    bottom: -40px;
+    font-size: 22px;
+    color: var(--rose);
+    opacity: 0.55;
+    animation: floatUp linear infinite;
+  }
+
+  @keyframes floatUp {
+    0%   { transform: translateY(0) translateX(0) rotate(0deg); opacity: 0; }
+    10%  { opacity: 0.55; }
+    100% { transform: translateY(-110vh) translateX(var(--drift, 20px)) rotate(360deg); opacity: 0; }
+  }
+
+  .card {
+    position: relative;
+    z-index: 1;
+    max-width: 480px;
+  }
+
+  .eyebrow {
+    font-family: 'Snell Roundhand', 'Brush Script MT', cursive;
+    font-size: 28px;
+    color: var(--rose-deep);
+    margin: 0 0 4px;
+    letter-spacing: 0.5px;
+  }
+
+  h1 {
+    font-size: clamp(28px, 6vw, 42px);
+    font-weight: 600;
+    margin: 0 0 14px;
+    line-height: 1.25;
+    color: var(--ink);
+  }
+
+  .cutie {
+    font-family: 'Snell Roundhand', 'Brush Script MT', cursive;
+    color: var(--rose-deep);
+    font-size: 0.6em;
+    display: inline-block;
+  }
+
+  .sub {
+    font-size: 17px;
+    color: #8a6d72;
+    margin: 0 0 40px;
+    line-height: 1.5;
+  }
+
+  .buttons {
+    position: relative;
+    display: flex;
+    gap: 22px;
+    justify-content: center;
+    align-items: center;
+    min-height: 70px;
+  }
+
+  button {
+    font-family: inherit;
+    font-size: 18px;
+    font-weight: 600;
+    border: none;
+    border-radius: 999px;
+    padding: 16px 38px;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  #yes {
+    background: linear-gradient(135deg, var(--rose-deep), var(--gold));
+    color: #fffaf3;
+    box-shadow: 0 8px 22px rgba(201, 105, 122, 0.35);
+  }
+
+  #yes:hover {
+    transform: translateY(-2px) scale(1.04);
+    box-shadow: 0 12px 28px rgba(201, 105, 122, 0.45);
+  }
+
+  #no {
+    position: relative;
+    background: #fff;
+    color: var(--rose-deep);
+    border: 1.5px solid var(--rose);
+    transition: left 0.18s ease, top 0.18s ease, transform 0.15s ease;
+  }
+
+  #no.fixed-pos {
+    position: fixed;
+  }
+
+  .yes-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 5;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background: linear-gradient(160deg, var(--cream) 0%, var(--blush) 55%, #f3d6da 100%);
+    flex-direction: column;
+    padding: 24px;
+  }
+
+  .yes-screen.show { display: flex; }
+
+  .yes-screen .big {
+    font-size: clamp(34px, 8vw, 56px);
+    margin: 0 0 12px;
+    color: var(--rose-deep);
+  }
+
+  .yes-screen p {
+    font-size: 18px;
+    color: #8a6d72;
+    max-width: 420px;
+  }
+
+  .dodge-msg {
+    position: absolute;
+    bottom: -38px;
+    left: 0;
+    right: 0;
+    font-size: 14px;
+    color: #a87b81;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .dodge-msg.show { opacity: 1; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .heart { animation: none; display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hearts" id="hearts"></div>
+
+<div class="stage">
+  <div class="card">
+    <p class="eyebrow">a question, for you</p>
+    <h1>Will you go on a date<br>with me, Aditi Singh? <span class="cutie">(cutie)</span></h1>
+    <p class="sub">Take your time. (Well — take your time on one of these buttons, anyway.)</p>
+    <div class="buttons">
+      <button id="yes">Yes, I'd love to 💛</button>
+      <button id="no">No</button>
+      <div class="dodge-msg" id="dodgeMsg"></div>
+    </div>
+  </div>
+</div>
+
+<div class="yes-screen" id="yesScreen">
+  <div class="big">It's a date. 🌹</div>
+  <p>I'll pick the time and place — you just have to show up looking however you want, because you'll be the best part of it either way.</p>
+</div>
+
+<script>
+  // Floating hearts background
+  const heartsContainer = document.getElementById('hearts');
+  const heartCount = 18;
+  for (let i = 0; i < heartCount; i++) {
+    const h = document.createElement('div');
+    h.className = 'heart';
+    h.textContent = ['♥','❀','♡'][Math.floor(Math.random()*3)];
+    h.style.left = Math.random() * 100 + 'vw';
+    h.style.fontSize = (14 + Math.random() * 18) + 'px';
+    h.style.setProperty('--drift', (Math.random() * 80 - 40) + 'px');
+    h.style.animationDuration = (8 + Math.random() * 10) + 's';
+    h.style.animationDelay = (Math.random() * 10) + 's';
+    heartsContainer.appendChild(h);
+  }
+
+  const noBtn = document.getElementById('no');
+  const yesBtn = document.getElementById('yes');
+  const dodgeMsg = document.getElementById('dodgeMsg');
+  const yesScreen = document.getElementById('yesScreen');
+
+  const messages = [
+    "nice try.",
+    "nope, can't catch this one.",
+    "getting warmer... or colder?",
+    "it's not going to happen 😌",
+    "you're persistent, I like that.",
+    "okay but the answer is still yes-only.",
+    "I'll just keep moving forever.",
+    "this button has trust issues.",
+    "just click yes already 💛",
+  ];
+
+  let dodgeCount = 0;
+
+  function moveNoButton() {
+    const btnRect = noBtn.getBoundingClientRect();
+    const margin = 16;
+    const maxX = window.innerWidth - btnRect.width - margin;
+    const maxY = window.innerHeight - btnRect.height - margin;
+
+    const newX = Math.max(margin, Math.random() * maxX);
+    const newY = Math.max(margin, Math.random() * maxY);
+
+    if (!noBtn.classList.contains('fixed-pos')) {
+      noBtn.classList.add('fixed-pos');
+    }
+
+    noBtn.style.left = newX + 'px';
+    noBtn.style.top = newY + 'px';
+
+    dodgeCount++;
+    const msg = messages[Math.min(dodgeCount - 1, messages.length - 1)];
+    dodgeMsg.textContent = msg;
+    dodgeMsg.classList.add('show');
+
+    // grow the Yes button slightly each time, just for fun
+    const scale = Math.min(1 + dodgeCount * 0.04, 1.6);
+    yesBtn.style.transform = `scale(${scale})`;
+  }
+
+  // Desktop: dodge on hover/mouse approach
+  noBtn.addEventListener('mouseenter', moveNoButton);
+
+  // Mobile / fallback: dodge on touchstart and click (click won't normally fire if it moves in time, but this covers taps)
+  noBtn.addEventListener('touchstart', function (e) {
+    e.preventDefault();
+    moveNoButton();
+  }, { passive: false });
+
+  noBtn.addEventListener('click', function (e) {
+    e.preventDefault();
+    moveNoButton();
+  });
+
+  yesBtn.addEventListener('click', function () {
+    yesScreen.classList.add('show');
+  });
+
+  window.addEventListener('resize', function () {
+    if (noBtn.classList.contains('fixed-pos')) {
+      const rect = noBtn.getBoundingClientRect();
+      const maxX = window.innerWidth - rect.width - 16;
+      const maxY = window.innerHeight - rect.height - 16;
+      noBtn.style.left = Math.min(parseFloat(noBtn.style.left), maxX) + 'px';
+      noBtn.style.top = Math.min(parseFloat(noBtn.style.top), maxY) + 'px';
+    }
+  });
+</script>
+
+</body>
+</html>
